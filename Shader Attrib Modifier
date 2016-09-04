@@ -30,7 +30,7 @@ def inputMap():
     print damM
 class disCommands(object):
     def __init__(self):
-        print  'Jay Sri Krishna'
+        print  'It all good here'
         
     def disconRandom(self,am,froz):
         for i in am:
@@ -112,7 +112,7 @@ class disCommands(object):
                     print 'Wrong Value Input in the box'
 class BHoleCommand(object):
     def __init__(self):
-        print ' Bharat mata ki Jay '
+        print ' 2nd track error'
         
     def blackHole(self, Gate):
         for b in am:
@@ -127,7 +127,7 @@ class BHoleCommand(object):
     
 class chkAttrbDiscon(disCommands):
     def __init__(self):
-        print 'Jai SriRam'
+        print ' bunch of sites'
         hotspot.mapAttrbDiscon(cl)
         
     def attrbDiscon(self,cl):
@@ -158,7 +158,7 @@ class chkAttrbDiscon(disCommands):
             print 'page error'   
 class chkMapAttrDiscon(disCommands):
     def __init__(self):
-        print 'Indian superHero'
+        print 'comicon superHeros'
                             
     def mapAttrbDiscon(self,damM):
         if int(gm) > 1:
@@ -189,7 +189,7 @@ class chkMapAttrDiscon(disCommands):
                     
 class chkBlackHole(BHoleCommand):
     def __init__(self):
-        print 'Jai Hind'
+        print ' 4th error process'
         
     def BattrbOvr(self):
         if int(gm) > 1:
