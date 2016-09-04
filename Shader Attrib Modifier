@@ -2,6 +2,7 @@
 #Maya - Python Tools Developements
 
 #Shader Attrib Modifier.py
+import maya.cmds as cmds
 mapTick = []
 valueTick = []
 allMats = cmds.ls(materials= True)
