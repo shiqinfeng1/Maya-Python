@@ -1,0 +1,124 @@
+import maya.cmds as cmds
+import pymel.core as pm
+import maya.mel as mel
+
+renPlugin = [(cmds.getAttr( 'defaultRenderGlobals.ren', type = False))]
+ren_cam = []
+xFrms = []
+rFrms = []
+frames = []
+dframes = []
+cd = []
+
+class rend_func( object ):
+    def __init_(self):
+        print ' developed by Girijashankar Senapati '
+
+    def ren_global(self):
+        global renPlugin
+        renPlugin = cmds.getAttr( 'defaultRenderGlobals.ren', type = False)
+        return renPlugin
+
+    def de_frms(self):
+        global xFrms
+        global rFrms
+        global frames
+        global dframes
+        xFrms = cmds.textField ('xFrmBox', text = True, query = True )
+        rFrms = cmds.textField ('rFrmBox', text = True, query = True )
+        frames= xFrms.split(",")
+        dframes= rFrms.split("-")
+        return xFrms
+        return rFrms
+        return frames
+        return dframes
+    
+    def x_cam(self):
+        for c in cmds.listCameras():
+            global ren_cam
+            print c
+            attrB = c + '.renderable'
+            ren_cam = cmds.getAttr(attrB)
+            if ren_cam :
+                print c
+                ren_cam = c
+                print ren_cam
+                return ren_cam
+
+class exec_render(rend_func):
+    def __init__(self):
+        self.ren_global()
+        self.de_frms()
+        self.x_cam()
+        self.func(ren_cam)
+        print cmds.confirmDialog(title = ' Render Sucessful ' , message = ' Render has been completed, please check the Render Path' , cancelButton='No' )
+        
+    def func(self,ren_cam):
+        if xFrms:
+            for i in (frames):
+                cmds.currentTime(i)
+                if renPlugin == 'mayaSoftware':
+                    cmds.render()
+                
+                elif renPlugin == 'mentalRay':
+                    print cmds.Mayatomr(preview = True, camera = ren_cam)
+                
+                else:
+                    pass
+            
+            if renPlugin == 'vray':
+                cmds.currentTime(i)
+                cmds.setAttr ('defaultRenderGlobals.animation', 1 )
+                for f in frames:
+                    cmds.setAttr ('defaultRenderGlobals.startFrame', f )
+                    cmds.setAttr ('defaultRenderGlobals.endFrame', f )
+                    print cmds.setAttr ('vraySettings.animBatchOnly', 0)
+                    print pm.vrend(preview = True,camera = ren_cam)
+                    
+            elif renPlugin == 'arnold':
+                for f in frames:
+                    cmds.setAttr ('defaultRenderGlobals.startFrame', f )
+                    cmds.setAttr ('defaultRenderGlobals.endFrame', f )
+                    print cmds.arnoldRender(batch = True,camera = ren_cam)
+            
+            else:
+                pass
+
+        elif rFrms:
+            cd = int(dframes[1]) + 1
+            for i in range(int(dframes[0]), int(cd)):
+                cmds.currentTime(i, u = True)
+                if renPlugin == 'mayaSoftware':
+                    cmds.render()
+                elif renPlugin == 'mentalRay':
+                    print cmds.Mayatomr(preview = True, camera = ren_cam)
+                else:
+                    pass
+
+            if renPlugin == 'vray':
+                cmds.setAttr ('defaultRenderGlobals.animation', 1 )
+                cmds.setAttr ('defaultRenderGlobals.startFrame', dframes[0] )
+                cmds.setAttr ('defaultRenderGlobals.endFrame', dframes[1] )
+                print cmds.setAttr ('vraySettings.animBatchOnly', 0)
+                print pm.vrend(preview = True,camera = ren_cam)
+            
+            elif renPlugin == 'arnold':
+                cmds.setAttr ('defaultRenderGlobals.startFrame', dframes[0] )
+                cmds.setAttr ('defaultRenderGlobals.endFrame', dframes[1] )
+                print cmds.arnoldRender(batch = True,camera = ren_cam )
+                
+        else:
+            pass
+        
+cmds.window( title="My Renderer", widthHeight=(100, 100) )
+cmds.columnLayout( adjustableColumn=True )
+cmds.RenderViewWindow()
+cmds.textField('xFrmBox', ann = ' enter Frame number to Render separated by comma eg: < 15,20,25 > ', ec = 'exec_render()', pht = 'enter specific frames eg: 15,20,120,250 ')
+cmds.textField('rFrmBox', ann = ' enter Frame number to Render separated by ifen eg: < 30-120 > ', ec = 'exec_render()', pht = 'enter framerange for viewport render eg: 30-120' )
+
+#cmds.textField('xFrmBox', ann = ' enter Frame number to Render separated by comma eg: < 15,20,25 > ', ec = 'exec_render()' )
+#cmds.textField('rFrmBox', ann = ' enter Frame number to Render separated by ifen eg: < 30-120 > ', ec = 'exec_render()' )
+
+cmds.button( label='Render Now', command= 'exec_render()' , bgc = (0.4,0.4,0.3) , ann = ' What you waiting for Dude!!! press me ')
+cmds.setParent( '..' )
+cmds.showWindow('jumboTrick')
