@@ -1,0 +1,218 @@
+exec(open('D:/gss/Scripts/Taj_mahal/Tajmahal_Alembic_Pipeline.py'))
+
+
+
+
+def refer_file( fileName, fileType):
+   cmds.file( fileName,namespace=':', gl = True, r=True, shd = "shadingNetworks", mergeNamespacesOnClash = True, options = "v=1;p=17;f=0" )
+   return 1
+
+cmds.fileBrowserDialog( m=0, fc=refer_file, ft='mayaAscii', an='Reference File', om='Reference' )
+
+
+
+
+
+import maya.cmds as cmds
+import os
+import os.path
+import maya.mel as mel
+
+
+char_name =[]
+set_name = []
+new_path = []
+selected_char = []
+
+
+# refer button for animator
+def refer_button():
+        exec(open('D:/gss/Scripts/Taj_mahal/script/refer_buttton.py'))
+
+# input Framerange
+startFrm = []
+endFrm = []
+shot_num = []
+
+# Rat Count
+RatA = 0
+RatB = 0
+RatC = 0
+RatD = 0
+
+
+def input_frm():
+    print 'old %%5'
+    global startFrm
+    global endFrm
+    global shot_num
+    startFrm= cmds.textField('strFrmBox', text=True,query = True)
+    endFrm= cmds.textField('endFrmBox', text=True,query = True)
+    shot_num= cmds.textField('shotFrmBox', text=True,query = True)
+    endFrm = " " + endFrm
+    return startFrm
+    return shot_num
+    return endFrm
+    print startFrm
+    print endFrm
+    print shot_num
+
+def selectCh( item ):
+	print item
+	global char_name
+	global set_name
+	char_name = item + '.abc'
+	set_name = item
+	print char_name
+	print set_name
+	return set_name
+	return char_name
+
+def input_rats():
+    print 'input rats numbers '
+    global RatA
+    global RatB
+    global RatC
+    global RatD
+    RatA= cmds.textField('BoxA', text=True,query = True)
+    RatB= cmds.textField('BoxB', text=True,query = True)
+    RatC= cmds.textField('BoxC', text=True,query = True)
+    RatD= cmds.textField('BoxD', text=True,query = True)
+    print RatA
+    return RatA
+    print RatB
+    return RatB
+    print RatC
+    return RatC
+    print RatD
+    return RatD
+
+
+def import_rats(RatA, RatB, RatC, RatD):
+    print "import_rats warning"
+    if RatA > 0:
+        for d in range(int(RatA)):
+            cmds.file("D:/gss/Scripts/Taj_mahal/Assets/rigs/Rat_A_Rig_01/Rat_A_01.ma", namespace = ":", ra = True, mergeNamespacesOnClash = True , options = "v=0;p=17;f=0" ,i = True)
+    else:
+        print 'no Rat A'
+    if RatB > 0:
+        for d in range(int(RatB)):
+            cmds.file("D:/gss/Scripts/Taj_mahal/Assets/rigs/Rat_B_Rig_01/Rat_B_01.ma", namespace = ":", ra = True, mergeNamespacesOnClash = True , options = "v=0;p=17;f=0" ,i = True)
+    else:
+        print 'no Rat B'
+    if RatC > 0:
+        for d in range(int(RatC)):
+            cmds.file("D:/gss/Scripts/Taj_mahal/Assets/rigs/Rat_C_Rig_01/Rat_C_01.ma", namespace = ":", ra = True, mergeNamespacesOnClash = True , options = "v=0;p=17;f=0" ,i = True)
+    else:
+        print 'no Rat C'
+    if RatD > 0:
+        for d in range(int(RatD)):
+            cmds.file("D:/gss/Scripts/Taj_mahal/Assets/rigs/Rat_D_Rig_01/Rat_D_01.ma", namespace = ":", ra = True, mergeNamespacesOnClash = True , options = "v=0;p=17;f=0" ,i = True)
+    else:
+        print 'no Rat D'
+
+def import_Rats():
+    print input_rats()
+    print import_rats(RatA, RatB, RatC, RatD)
+
+
+class abc_data(object):
+    def __init__(self):
+        print 'abc data warning'
+        
+    def shot_name(self):
+        print 'halfway'
+        global new_path
+        file_path = cmds.file(expandName =True, q = True)
+        old_path = file_path.replace( 'anim','abc', 1)
+        edit_path = os.path.split(old_path)
+        new_path = old_path.replace( edit_path[1], char_name, 1)
+        return new_path
+        
+    def select_char(self):
+        print 'host char'
+        global selected_char
+        selected_char = cmds.ls(selection = True)
+        return selected_char
+       
+    
+# alembic export button         
+class abcExport(abc_data):
+    def __init__(self):
+        print input_frm()
+        self.shot_name()
+        if cmds.ls(selection = True):
+            self.select_char()
+        else:
+            print cmds.confirmDialog(title = ' Warning!!! ' , message = ' please select an object' , cancelButton='Oky' )
+        self.char_export()
+        self.epath_check()
+        print 'abc export warning'
+    
+    def char_export(self):
+        attrZ = " " + "|" + selected_char[0] + " " + "-file" + " "    
+        common = "-frameRange " + startFrm + endFrm + " -uvWrite -writeVisibility -dataFormat ogawa -root" + attrZ + new_path
+        cmds.AbcExport( j = common)
+
+    def epath_check(self):
+        if os.path.isfile(new_path):
+            print cmds.confirmDialog(title = ' Sucessfully Done ' , message = ' Alembic has been replaced sucessfully' , cancelButton='Oky' )
+        else:
+            print cmds.confirmDialog(title = ' Error !!! ' , message = 'Error !!! not done ' , cancelButton='Oky' )
+
+class abcImport(abc_data):
+    def __init__(self):
+        print input_frm()
+        print ' abc import warning'
+        self.rep_abc()
+        self.path_check()
+    
+
+    def rep_abc(self):
+        attrM = "Shot" + shot_num
+        abc_file_path = '"D:/gss/Scripts/SparkMV/Shots/Shot/Shot999/3D/data/abc/file.abc"'
+        new_pathA = abc_file_path.replace( 'Shot999' , attrM, 1)
+        new_pathB = new_pathA.replace( "file" , set_name, 1)
+        abc_data_path = ("AbcImport" + " " + "-mode import -connect" + " " + '"/"' + " " + new_pathB)
+        mel.eval(abc_data_path)
+        
+    def path_check(self):
+        path_chk = []
+        path_chk = eval(new_pathB)
+        if os.path.isfile(path_chk):
+            print cmds.confirmDialog(title = ' Sucessfully Done ' , message = ' Alembic has been replaced sucessfully' , cancelButton='Oky' )
+        else:
+            print cmds.confirmDialog(title = ' Error !!! ' , message = 'Error !!! not done ' , cancelButton='Oky' )
+    
+        
+
+
+cmds.window( title="SparkMV Alembic Pipeline",bgc = (0.5,0.5,0.5) )
+
+# Frame Layout for animators
+cmds.frameLayout( label='For Animators',w = 580, h =250,  borderStyle='out', bgc = (.2,.25,.4) )
+
+cmds.rowColumnLayout( numberOfRows=1,w = 10, h =30, cs = [(450, 40)]  )
+cmds.button( label = 'Create Reference', command = 'refer_button()', w = 110, h = 30, bgc = (.4,.4,.4))
+  
+cmds.textField('strFrmBox', ann = ' enter startFrame  ', ec = 'input_frm()', pht = '1001',  bgc = (.8,.8,.8) )
+cmds.textField('endFrmBox', ann = ' enter endFrame  ', ec = 'input_frm()', pht = '1090',bgc = (.8,.8,.8))
+cmds.button( label = 'Export abc', command = 'abcExport()', w = 80, h = 30, bgc = (.2,.25,.4))
+cmds.setParent( '..' )
+
+#for Lighters
+
+cmds.frameLayout( label='For Lighters',w = 420, h =80,  borderStyle='out', bgc = (0.1,0.3,0.3) )
+cmds.rowColumnLayout( numberOfRows=2,w = 200, h =80, cs = [(450, 40)]  )
+
+cmds.textField('shotFrmBox', ann = ' enter ShotNumber  ', ec = 'input_frm()', pht = '250',  bgc = (.8,.8,.8) )
+cmds.textField('BoxA', ann = ' enter ShotNumber  ', ec = 'input_frm()', pht = 'Rat A',  bgc = (.8,.8,.8) )  
+cmds.textField('BoxB', ann = ' enter ShotNumber  ', ec = 'input_frm()', pht = 'Rat B',  bgc = (.8,.8,.8) )
+cmds.textField('BoxC', ann = ' enter ShotNumber  ', ec = 'input_frm()', pht = 'Rat C',  bgc = (.8,.8,.8) )
+cmds.textField('BoxD', ann = ' enter ShotNumber  ', ec = 'input_frm()', pht = 'Rat D',  bgc = (.8,.8,.8) )
+
+cmds.button( label = 'Import Rats', command = 'import_Rats()', w = 80, h = 30,  bgc = (0.1,0.3,0.3) )
+cmds.button( label = 'Replace Abc', command = 'x = abcImport()', w = 80, h = 30, bgc = (0.1,0.3,0.3) )
+cmds.setParent( '..' )
+
+cmds.showWindow()
