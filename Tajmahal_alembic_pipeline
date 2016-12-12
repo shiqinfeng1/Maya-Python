@@ -1,48 +1,26 @@
-exec(open('D:/gss/Scripts/Taj_mahal/Tajmahal_Alembic_Pipeline.py'))
-
-
-
-
-def refer_file( fileName, fileType):
-   cmds.file( fileName,namespace=':', gl = True, r=True, shd = "shadingNetworks", mergeNamespacesOnClash = True, options = "v=1;p=17;f=0" )
-   return 1
-
-cmds.fileBrowserDialog( m=0, fc=refer_file, ft='mayaAscii', an='Reference File', om='Reference' )
-
-
-
-
-
 import maya.cmds as cmds
 import os
 import os.path
 import maya.mel as mel
 
 
-char_name =[]
-set_name = []
-new_path = []
-selected_char = []
-
-
 # refer button for animator
 def refer_button():
         exec(open('D:/gss/Scripts/Taj_mahal/script/refer_buttton.py'))
+
 
 # input Framerange
 startFrm = []
 endFrm = []
 shot_num = []
 
-# Rat Count
-RatA = 0
-RatB = 0
-RatC = 0
-RatD = 0
+char_name =[]
+set_name = []
+selected_char = []
 
 
 def input_frm():
-    print 'old %%5'
+    print 'input frames for exporting done'
     global startFrm
     global endFrm
     global shot_num
@@ -57,16 +35,75 @@ def input_frm():
     print endFrm
     print shot_num
 
-def selectCh( item ):
-	print item
-	global char_name
-	global set_name
-	char_name = item + '.abc'
-	set_name = item
-	print char_name
-	print set_name
-	return set_name
-	return char_name
+
+# adding data information for exporting alembic to server path
+
+class abc_data(object):
+    def __init__(self):
+        print 'abc data warning'
+        
+    def shot_name(self):
+        print 'halfway'
+        global old_path
+        global file_path
+        file_path = cmds.file(expandName =True, q = True)
+        print file_path
+        old_path = file_path.replace( 'anim','abc', 1)
+        print old_path
+        return old_path
+        return file_path
+        
+    def select_char(self):
+        print 'host char'
+        if cmds.ls(selection = True):
+            global selected_char
+            selected_char = cmds.ls(selection = True)
+            return selected_char
+        else:
+            print cmds.confirmDialog(title = ' Warning!!! ' , message = ' please select an object and click to export' , cancelButton='Oky GSS' )
+
+    
+# alembic export button         
+class abcExport(abc_data):
+    def __init__(self):
+        print 'abc export warning'
+        print input_frm()
+        self.shot_name()
+        self.select_char()
+        self.char_export()
+        self.epath_check()
+    
+    def char_export(self):
+        for po in selected_char:
+            try:
+                edit_path = os.path.split(old_path)
+                abc_name = po + '.abc'
+                new_path = old_path.replace( edit_path[1], abc_name, 1)
+                attrZ = " " + "|" + po + " " + "-file" + " "    
+                common = "-frameRange " + startFrm + endFrm + " -uvWrite -writeVisibility -dataFormat ogawa -root" + attrZ + new_path
+                cmds.AbcExport( j = common)
+            except:
+                pass
+
+    def epath_check(self):
+         edit_path = os.path.split(old_path)
+         for eo in selected_char:
+             abc_name = eo + '.abc'
+             new_path = old_path.replace( edit_path[1], abc_name, 1)
+             attrK = eo + " " + 'Error !!! not exported'
+             if os.path.isfile(new_path):
+                 print cmds.confirmDialog(title = ' Sucessfully Done ' , message = ' Alembic has been Exported sucessfully' , cancelButton='Oky GSS' )
+                 break
+             else:
+                 print cmds.confirmDialog(title = ' Error !!! ' , message = attrK , cancelButton='Oky GSS' )
+
+
+
+# Rat Count
+RatA = 0
+RatB = 0
+RatC = 0
+RatD = 0
 
 def input_rats():
     print 'input rats numbers '
@@ -87,6 +124,8 @@ def input_rats():
     print RatD
     return RatD
 
+
+# for import RAt shading file from server path
 
 def import_rats(RatA, RatB, RatC, RatD):
     print "import_rats warning"
@@ -114,85 +153,96 @@ def import_rats(RatA, RatB, RatC, RatD):
 def import_Rats():
     print input_rats()
     print import_rats(RatA, RatB, RatC, RatD)
+    print cmds.confirmDialog(title = 'Sucessfully Done ' , message = 'Assets have been imported' , cancelButton='Oky GSS' ) 
 
 
-class abc_data(object):
-    def __init__(self):
-        print 'abc data warning'
-        
-    def shot_name(self):
-        print 'halfway'
-        global new_path
-        file_path = cmds.file(expandName =True, q = True)
-        old_path = file_path.replace( 'anim','abc', 1)
-        edit_path = os.path.split(old_path)
-        new_path = old_path.replace( edit_path[1], char_name, 1)
-        return new_path
-        
-    def select_char(self):
-        print 'host char'
-        global selected_char
-        selected_char = cmds.ls(selection = True)
-        return selected_char
-       
-    
-# alembic export button         
-class abcExport(abc_data):
-    def __init__(self):
-        print input_frm()
-        self.shot_name()
-        if cmds.ls(selection = True):
-            self.select_char()
-        else:
-            print cmds.confirmDialog(title = ' Warning!!! ' , message = ' please select an object' , cancelButton='Oky' )
-        self.char_export()
-        self.epath_check()
-        print 'abc export warning'
-    
-    def char_export(self):
-        attrZ = " " + "|" + selected_char[0] + " " + "-file" + " "    
-        common = "-frameRange " + startFrm + endFrm + " -uvWrite -writeVisibility -dataFormat ogawa -root" + attrZ + new_path
-        cmds.AbcExport( j = common)
 
-    def epath_check(self):
-        if os.path.isfile(new_path):
-            print cmds.confirmDialog(title = ' Sucessfully Done ' , message = ' Alembic has been replaced sucessfully' , cancelButton='Oky' )
-        else:
-            print cmds.confirmDialog(title = ' Error !!! ' , message = 'Error !!! not done ' , cancelButton='Oky' )
+# Declaring the existed shot path and Replace path notes
+new_pathA= []
+new_pathC= []
+new_pathD= []
+
+path_files = []
+
+listA= []
+file_path = []
+new_path = []
+old_path = []
+
+abc_file_path = '"D:/gss/Scripts/Taj_mahal/Shots/Shot/Shot999/3D/data/abc/"'
+abc_file_pathA = '"D:/gss/Scripts/Taj_mahal/Shots/Shot/Shot999/3D/data/abc/file"'
+
+remove_abc = []
+ex_abc_grp = []
+
 
 class abcImport(abc_data):
     def __init__(self):
-        print input_frm()
         print ' abc import warning'
+        print input_frm()
+        self.path_abc()
         self.rep_abc()
-        self.path_check()
+        self.delete_grps_data()
     
-
-    def rep_abc(self):
+#get path files in list
+    def path_abc(self):
         attrM = "Shot" + shot_num
-        abc_file_path = '"D:/gss/Scripts/SparkMV/Shots/Shot/Shot999/3D/data/abc/file.abc"'
+        global new_pathA
+        global new_pathC
+        global path_files
         new_pathA = abc_file_path.replace( 'Shot999' , attrM, 1)
-        new_pathB = new_pathA.replace( "file" , set_name, 1)
-        abc_data_path = ("AbcImport" + " " + "-mode import -connect" + " " + '"/"' + " " + new_pathB)
-        mel.eval(abc_data_path)
+        print new_pathA
+        new_pathC = eval(new_pathA)
+        print new_pathC
+        path_files = cmds.getFileList( folder = new_pathC )
+        print path_files
+        global new_pathD
+        new_pathD = abc_file_pathA.replace( 'Shot999' , attrM, 1)
+        print new_pathD
+        return new_pathD
+        return new_pathA
+        return new_pathC
         
-    def path_check(self):
-        path_chk = []
-        path_chk = eval(new_pathB)
-        if os.path.isfile(path_chk):
-            print cmds.confirmDialog(title = ' Sucessfully Done ' , message = ' Alembic has been replaced sucessfully' , cancelButton='Oky' )
-        else:
-            print cmds.confirmDialog(title = ' Error !!! ' , message = 'Error !!! not done ' , cancelButton='Oky' )
-    
-        
+    def rep_abc(self):
+        for dk in path_files:
+            try:
+                new_abc_pathA = new_pathD.replace( "file" , dk)
+                abc_data_path = ("AbcImport" + " " + "-mode import -connect" + " " + '"/"' + " " + new_abc_pathA)
+                mel.eval(abc_data_path)
+            except:
+                pass
+        print cmds.confirmDialog(title = 'Sucessfully Done ' , message = 'Alembics have been replaced sucessfully' , cancelButton='Oky GSS' ) 
+                
+
+    def delete_grps_data(self):
+        for i in path_files:
+            remove_abc = i.replace('.abc',"")
+            listA.append(remove_abc)
+            print listA
+
+def delete_grps():
+    if cmds.ls(selection = True):
+        global ex_abc_grp
+        ex_abc_grp = cmds.ls(selection = True)
+        print ex_abc_grp
+        for ck in ex_abc_grp:
+            if ck in listA:
+                print 'good to go'
+            else:
+                cmds.select(ck)
+                cmds.delete()
+        print cmds.confirmDialog(title = 'Sucessfully Done ' , message = 'Unneeded groups have been deleted' , cancelButton='Oky GSS' ) 
+    else:
+        print cmds.confirmDialog(title = ' Warning!!! ' , message = ' atleast select an charcter group to delete !!!' , cancelButton='Oky GSS' )
+       
 
 
-cmds.window( title="SparkMV Alembic Pipeline",bgc = (0.5,0.5,0.5) )
+cmds.window( title="TajMahal Alembic Pipeline",bgc = (0.5,0.5,0.5) )
 
 # Frame Layout for animators
 cmds.frameLayout( label='For Animators',w = 580, h =250,  borderStyle='out', bgc = (.2,.25,.4) )
 
-cmds.rowColumnLayout( numberOfRows=1,w = 10, h =30, cs = [(450, 40)]  )
+cmds.rowColumnLayout( numberOfRows=1,w = 10, h =20, cs = [(450, 40)]  )
 cmds.button( label = 'Create Reference', command = 'refer_button()', w = 110, h = 30, bgc = (.4,.4,.4))
   
 cmds.textField('strFrmBox', ann = ' enter startFrame  ', ec = 'input_frm()', pht = '1001',  bgc = (.8,.8,.8) )
@@ -202,17 +252,20 @@ cmds.setParent( '..' )
 
 #for Lighters
 
-cmds.frameLayout( label='For Lighters',w = 420, h =80,  borderStyle='out', bgc = (0.1,0.3,0.3) )
-cmds.rowColumnLayout( numberOfRows=2,w = 200, h =80, cs = [(450, 40)]  )
-
-cmds.textField('shotFrmBox', ann = ' enter ShotNumber  ', ec = 'input_frm()', pht = '250',  bgc = (.8,.8,.8) )
+cmds.frameLayout( label='For Lighters',w = 420, h =20,  borderStyle='out', bgc = (0.1,0.3,0.3) )
+cmds.rowColumnLayout( numberOfRows= 1,w = 200, h =30, cs = [(30, 30)] )
 cmds.textField('BoxA', ann = ' enter ShotNumber  ', ec = 'input_frm()', pht = 'Rat A',  bgc = (.8,.8,.8) )  
 cmds.textField('BoxB', ann = ' enter ShotNumber  ', ec = 'input_frm()', pht = 'Rat B',  bgc = (.8,.8,.8) )
 cmds.textField('BoxC', ann = ' enter ShotNumber  ', ec = 'input_frm()', pht = 'Rat C',  bgc = (.8,.8,.8) )
 cmds.textField('BoxD', ann = ' enter ShotNumber  ', ec = 'input_frm()', pht = 'Rat D',  bgc = (.8,.8,.8) )
-
+cmds.setParent( '..' ) 
+cmds.rowColumnLayout( numberOfRows=3,w = 200, h =40, cs = [(450, 40)]  )
 cmds.button( label = 'Import Rats', command = 'import_Rats()', w = 80, h = 30,  bgc = (0.1,0.3,0.3) )
+cmds.setParent( '..' ) 
+cmds.rowColumnLayout( numberOfRows= 1,w = 200, h =60, cs = [(450, 80)] )
+cmds.textField('shotFrmBox', ann = ' enter ShotNumber  ', ec = 'input_frm()', pht = '250',  bgc = (.8,.8,.8) )
 cmds.button( label = 'Replace Abc', command = 'x = abcImport()', w = 80, h = 30, bgc = (0.1,0.3,0.3) )
+cmds.button( label = 'Delete Grps', command = 'delete_grps()', w = 80, h = 30, bgc = (0.1,0.3,0.3) )
 cmds.setParent( '..' )
 
 cmds.showWindow()
