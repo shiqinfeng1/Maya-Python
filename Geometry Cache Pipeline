@@ -1,0 +1,59 @@
+selected_char =  cmds.ls(selection = True)
+
+# data for selecting each character
+dataA = "|sqr_geo_all_grp|sqr_normal_geo_grp|sqr_anim_geo_grp|sqr_anim_body_geo" # Rat mesh part 01 is here
+dataB = "|sqr_geo_all_grp|sqr_normal_geo_grp|sqr_anim_geo_grp|sqr_anim_teeth_geo" # Rat mesh part 02 is here
+dataC = "|sqr_geo_all_grp|sqr_normal_geo_grp|sqr_anim_geo_grp|sqr_anim_tail_geo" # Rat mesh part 03 is here
+dataD = "select -r"
+
+
+# data for exporting to geometry cache of each character
+dataM = "doCreateGeometryCache 6" + " "
+dataN =  '{ "3",' + " " + '"'
+dataO =  '"'+ "," + " " + '"OneFilePerFrame",' + " " + '"1",' 
+dataP = '"0",' 
+dataQ = ',"0", "add", "0", "1", "1","0","1","mcx","0" }'
+
+
+cache_path_A = '"D:/gss/Scripts/Taj_mahal/Shots/Shot/Shot500/3D/data/cache/char_name/"'
+
+for ch in selected_char:
+	comb_ABCD = dataD + " " + ch + dataA + " " + ch + dataB + " " + ch + dataC
+	print comb_ABCD
+	mel.eval (comb_ABCD)
+	cache_path_B = cache_path_A.replace('char_name', ch, 1)
+	comb_MNOPQ = dataM + dataN + startFrm + '"' + "," + " " + '"'+ endFrm + dataO + " " + cache_path_B + "," + dataP + '"' + ch + '"' + dataQ
+	print comb_MNOPQ
+	mel.eval (comb_MNOPQ)
+
+
+# data for selecting the character in fur file
+dataA = "Rat_Fur_Grp_01 |sqr_geo_all_grp|sqr_normal_geo_grp|sqr_anim_geo_grp|sqr_anim_body_geo" # Rat mesh part 01 is here
+dataB = "Rat_Fur_Grp_01 |sqr_geo_all_grp|sqr_normal_geo_grp|sqr_anim_geo_grp|sqr_anim_teeth_geo" # Rat mesh part 02 is here
+dataC = "Rat_Fur_Grp_01 |sqr_geo_all_grp|sqr_normal_geo_grp|sqr_anim_geo_grp|sqr_anim_tail_geo" # Rat mesh part 03 is here
+dataD = "select -r"
+
+# setting the redner setting to ASs export only
+try:
+	cmds.setAttr ("defaultArnoldRenderOptions.renderType" , 1)
+except:
+	pass
+
+del_cache = 'deleteCacheFile 3 { "keep", "", "geometry" }'
+
+xml_path =  '$fileName = "D:/gss/Scripts/Taj_mahal/Shots/Shot/Shot500/3D/data/cache/xml_file_name/xml_file_name.xml"'
+xml_type =  '$fileType = "XML Cache Files"'
+
+xml_folders = cmds.getFileList( folder = "D:/gss/Scripts/Taj_mahal/Shots/Shot/Shot500/3D/data/cache/")
+
+for xm in xml_folders:
+	comb_ABCD = dataD + " " + dataA + " " + dataB + " " + dataC
+	print comb_ABCD
+	try:
+		mel.eval(del_cache)
+	except:
+		pass
+	new_xml_path = xml_path.replace("xml_file_name", xm, 2)
+	comb_xml = "importCacheFile $fileName $fileType"
+	mel.eval(comb_xml)
+	
