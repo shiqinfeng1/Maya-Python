@@ -28,9 +28,8 @@ for ch in selected_char:
 
 
 # data for selecting the character in fur file
-dataA = "Rat_Fur_Grp_01 |sqr_geo_all_grp|sqr_normal_geo_grp|sqr_anim_geo_grp|sqr_anim_body_geo" # Rat mesh part 01 is here
-dataB = "Rat_Fur_Grp_01 |sqr_geo_all_grp|sqr_normal_geo_grp|sqr_anim_geo_grp|sqr_anim_teeth_geo" # Rat mesh part 02 is here
-dataC = "Rat_Fur_Grp_01 |sqr_geo_all_grp|sqr_normal_geo_grp|sqr_anim_geo_grp|sqr_anim_tail_geo" # Rat mesh part 03 is here
+# data for selecting the character in fur file
+dataA = "sqr_anim_body_geo sqr_anim_teeth_geo sqr_anim_tail_geo" # Rat mesh part 01 is here
 dataD = "select -r"
 
 # setting the redner setting to ASs export only
@@ -45,15 +44,108 @@ xml_path =  '$fileName = "D:/gss/Scripts/Taj_mahal/Shots/Shot/Shot500/3D/data/ca
 xml_type =  '$fileType = "XML Cache Files"'
 
 xml_folders = cmds.getFileList( folder = "D:/gss/Scripts/Taj_mahal/Shots/Shot/Shot500/3D/data/cache/")
+fur_file = "D:/gss/Scripts/Taj_mahal/Shots/Shot/Shot500/3D/data/lighting/fur_files/fur_file_name.ma"
+
 
 for xm in xml_folders:
-	comb_ABCD = dataD + " " + dataA + " " + dataB + " " + dataC
-	print comb_ABCD
+	comb_AD = dataD + " " + dataA 
+	print comb_AD
+	mel.eval(comb_AD)
 	try:
 		mel.eval(del_cache)
 	except:
 		pass
 	new_xml_path = xml_path.replace("xml_file_name", xm, 2)
+	print new_xml_path
 	comb_xml = "importCacheFile $fileName $fileType"
+	print comb_xml
 	mel.eval(comb_xml)
+	new_fur_file = fur_file.replace ('fur_file_name', xm, 1)
+	cmds.file( rename = new_fur_file)
+	cmds.file( save=True, type='mayaAscii' )
 	
+
+
+
+
+import maya.mel as mel
+# data for selecting the character in fur file
+dataA = "sqr_anim_body_geo sqr_anim_teeth_geo sqr_anim_tail_geo" # Rat mesh part 01 is here
+dataD = "select -r"
+
+# setting the redner setting to ASs export only
+try:
+	cmds.setAttr ("defaultArnoldRenderOptions.renderType" , 1)
+	cmds.setAttr ("defaultArnoldRenderOptions.outputAssBoundingBox", 1)
+	cmds.setAttr ("defaultArnoldRenderOptions.expandProcedurals", 1)
+except:
+	pass
+
+del_cache = 'deleteCacheFile 3 { "keep", "", "geometry" }'
+
+xml_path =  '$fileName = "D:/gss/Scripts/Taj_mahal/Shots/Shot/Shot500/3D/data/cache/xml_file_name/xml_file_name.xml"'
+xml_type =  '$fileType = "XML Cache Files"'
+mel.eval(xml_type)
+from pymel.core import *
+
+xml_folders = cmds.getFileList( folder = "D:/gss/Scripts/Taj_mahal/Shots/Shot/Shot500/3D/data/cache/")
+fur_file = "D:/gss/Scripts/Taj_mahal/Shots/Shot/Shot500/3D/data/lighting/fur_files/fur_file_name.ma"
+
+
+for xm in xml_folders:
+	comb_AD = dataD + " " + dataA 
+	print comb_AD
+	mel.eval(comb_AD)
+	try:
+		mel.eval(del_cache)
+	except:
+		pass
+	mel.eval(xml_path)
+	new_xml_path = xml_path.replace("xml_file_name", xm, 2)
+	print new_xml_path
+	mel.eval(new_xml_path)
+	mel.eval(xml_type)
+	comb_xml = "importCacheFile" + " " + "$fileName" + " " + "$fileType"
+	print comb_xml
+	mel.eval(comb_xml)
+	new_fur_file = fur_file.replace ('fur_file_name', xm, 1)
+	cmds.file( rename = new_fur_file)
+	cmds.file( save=True, type='mayaAscii' )
+
+
+
+
+
+ntype = cmds.nodeType( "ArnoldStandInShape" )
+files = "D:/gss/Scripts/Taj_mahal/Shots/Shot/Shot500/3D/data/ass/Rat_C_Grp_01/Rat_B_01.#.ass.gz"
+cmds.setAttr( "cat.dso", files,  type="string" )
+print cmds.getAttr( 'ArnoldStandInShape.dso' )
+
+
+
+
+cmds.window( title="TajMahal Alembic Pipeline",bgc = (0.5,0.5,0.5) )
+
+# Frame Layout for animators
+cmds.frameLayout( label='Geometry Cache Export',w = 580, h =250,  borderStyle='out', bgc = (.2,.25,.4) )
+  
+cmds.textField('strFrmBox', ann = ' enter startFrame  ', ec = 'input_frm()', pht = '1001',  bgc = (.8,.8,.8) )
+cmds.textField('endFrmBox', ann = ' enter endFrame  ', ec = 'input_frm()', pht = '1090',bgc = (.8,.8,.8))
+cmds.button( label = 'Export GeoCache', command = 'abcExport()', w = 80, h = 30, bgc = (.2,.25,.4))
+cmds.setParent( '..' )
+
+#for Lighters
+
+cmds.frameLayout( label='Create Ass files',w = 420, h =20,  borderStyle='out', bgc = (0.1,0.3,0.3) )
+cmds.rowColumnLayout( numberOfRows= 1,w = 200, h =30, cs = [(30, 30)] )
+cmds.button( label = 'Save File', command = 'refer_button()', w = 110, h = 30, bgc = (.4,.4,.4))
+cmds.setParent( '..' ) 
+
+cmds.rowColumnLayout( numberOfRows=3,w = 200, h =40, cs = [(450, 40)]  )
+cmds.button( label = 'Import GeoCache', command = 'refer_button()', w = 110, h = 30, bgc = (.4,.4,.4))
+cmds.setParent( '..' ) 
+
+
+cmds.showWindow()
+
+
