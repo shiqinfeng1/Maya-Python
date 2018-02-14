@@ -1,0 +1,341 @@
+import maya.cmds as cmds
+import os
+import os.path
+import maya.mel as mel
+
+all_mesh_shapes = cmds.ls(type="mesh")
+all_meshes = []
+ass_export_path = []
+
+toolIcon = "/root/maya/projects/Sci_hunt/ass_node/creativity_technology.png"
+aiFile = "/root/maya/projects/Sci_hunt/ass_node/AiStandin.ma"
+try:
+    cmds.loadPlugin("mtoa.so")
+except:
+    pass
+
+
+class ass_data_grp(object):
+    def __init__(self):
+        print "ass data class grp...running"
+
+    # ass_data_grp().mesh_list()
+    def mesh_list(self):
+        global ass_export_path
+        print "making mesh list"
+        if len(all_mesh_shapes) >= 1:
+            for i in all_mesh_shapes:
+                if "Shape" in i:
+                    oj = i.replace("Shape", "")
+                    all_meshes.append(oj)
+                    print all_meshes
+        else:
+            print cmds.confirmDialog(title="Warning!!!",
+                                     message="Dude, atleast one poly mesh should be there to process",
+                                     cancelButton="Retry")
+        ass_export_path = cmds.textField("dbox", text=True, query=True)
+        if "/" in ass_export_path:
+            ass_export_path = ass_export_path + "/"
+        elif "\\" in ass_export_path:
+            print cmds.confirmDialog(title="Warning!!!", message="Dude, Backward slashes are not supported",
+                                     cancelButton="Retry")
+        else:
+            ass_export_path
+        print ass_export_path
+        return ass_export_path
+
+    def export_path_data(self):
+        print "export path data.."
+        global ass_export_path
+        try:
+            ass_export_path = cmds.textField("exp_path", query=True)
+        except:
+            pass
+        return ass_export_path
+        print ass_export_path
+
+    def mission_completed(self):
+        print "Roger, mission has been sucessfully completed"
+        print cmds.confirmDialog(title="wow", message="Dude, all ass have been successfully exported",
+                                 cancelButton="Done")
+
+    def import_aiStandin(self):
+        self.export_path_data()
+        print "aiStandin import process"
+        existed_ass_path = cmds.getFileList(folder=ass_export_path)
+        if len(existed_ass_path) >= 1:
+            if os.path.isfile(aiFile):
+                cmds.file(aiFile, i=True)
+                for d in range(len(exported_ass_list)):
+                    cmds.select("aiStandin")
+                    cmds.duplicate()
+                cmds.delete("aiStandin")
+            else:
+                print cmds.confirmDialog(title="Warning!!!", message="Dude, aiStandin file missing in the server",
+                                         cancelButton="Retry")
+        else:
+            print cmds.confirmDialog(title="Warning!!!", message="Dude,there are no ass files in the following path",
+                                     cancelButton="Retry")
+
+
+def bound_box(mode):
+    sel_ass = cmds.ls(selection=True)
+    for i in sel_ass:
+        try:
+            cmds.setAttr(i + ".mode", mode)
+        except:
+            pass
+
+dead_mesh = []
+exported_ass_list = []
+cleaned_ass_list = []
+dirty_ass_list = []
+kmesh = []
+am = " "
+
+
+class assExport_btn_grp(ass_data_grp):
+    def __init__(self):
+        print "ass export running"
+
+    def ass_export(self):
+        print "exporting ass to server path"
+        for sel_mesh in all_meshes:
+            try:
+                export_ass_name = sel_mesh + ".ass.gz"
+                new_ass_export_path = ass_export_path + export_ass_name
+                # print new_ass_export_path
+                common_exp_scriptA = "arnoldExportAss -f"
+                common_exp_scriptB = "-s -expandProcedurals -forceTranslateShadingEngines -compressed -boundingBox"
+                combined_scripts = common_exp_scriptA + " " + '"' + new_ass_export_path + '"' + " " + common_exp_scriptB
+                print combined_scripts
+                cmds.select(sel_mesh)
+                mel.eval(combined_scripts)
+            except:
+                pass
+        existed_ass_in_path = cmds.getFileList(folder=ass_export_path)
+        if len(all_meshes) == len(existed_ass_in_path):
+            cmds.confirmDialog(title="process done", message="ass export process completed", cancelButton="close")
+        else:
+            print cmds.confirmDialog(title="process done", message="ass export process completed", cancelButton="close")
+
+    def ass_path_check(self):
+        print "ass path checking in progress..."
+        global dead_mesh
+        global exported_ass_list
+        for sel_mesh in all_meshes:
+            export_ass_name = ass_export_path + sel_mesh + ".ass.gz"
+            if os.path.isfile(export_ass_name):
+                exported_ass_list.append(sel_mesh)
+            else:
+                dead_mesh.append(sel_mesh)
+                print dead_mesh
+        existed_ass_in_path = cmds.getFileList(folder=ass_export_path)
+        new_e_ass_in_path = int(len(existed_ass_in_path)) / 2
+        print new_e_ass_in_path
+        if int(len(all_meshes)) == int(new_e_ass_in_path):
+            self.mission_completed()
+        else:
+            cmds.confirmDialog(title="Error !!!", message="Dude, some ass are not exported", cancelButton="Retry")
+            print "missing polygon list is below,check the polygon naming"
+            print dead_mesh
+
+    def link_ass(self):
+        cleaned_ass_list = []
+        all_aiStandIns = cmds.ls(type="aiStandIn")
+        print all_aiStandIns
+        for e in all_aiStandIns:
+            if "Shape" in e:
+                nest = e.replace("Shape", "")
+                cleaned_ass_list.append(nest)
+        for e_ass in range(len(cleaned_ass_list)):
+            export_ass_name = ass_export_path + exported_ass_list[e_ass] + ".ass.gz"
+            print export_ass_name
+            if os.path.isfile(export_ass_name):
+                new_standIn_name = all_meshes[e_ass] + "_ass"
+                cmds.rename(cleaned_ass_list[e_ass], new_standIn_name)
+
+        all_aiStandIns = cmds.ls(type="aiStandIn")  # assExport_btn_grp().link_ass()
+        for e in all_aiStandIns:
+            if "_assShape" in e:
+                nest = e.replace("_assShape", "")
+                dirty_ass_list.append(nest)
+        for g in all_meshes:
+            for g in dirty_ass_list:
+                if g in all_meshes:
+                    cmds.select(g)
+                    cmds.pickWalk(d="up")
+                    sel_grp = cmds.ls(selection=True)
+                    sel_mesh = cmds.ls(selection=True)
+                    cmds.parent(g + "_ass", sel_grp)
+
+    def tool_window(self):
+        cmds.window(widthHeight=(320, 320), title="Mesh-to-AssExport 1.0", bgc=(0.29, 0.29, 0.29))
+        cmds.columnLayout(columnAttach=('both', 5), rowSpacing=10, columnWidth=320)
+        cmds.picture(image=toolIcon)
+        cmds.setParent('..')
+        cmds.rowColumnLayout(numberOfRows=1, rowSpacing=(10, 30), cs=[(450, 15)])
+        cmds.button(label='Multiple Meshchk', command='printClashing()', bgc=(0.2, 0.2, 0.2))
+        cmds.button(label='Multiple ShapeNode chk', command='shape_chk()', bgc=(0.2, 0.2, 0.2))
+        cmds.setParent('..')
+        cmds.columnLayout(columnAttach=('both', 5), rowSpacing=20, columnWidth=320)
+        cmds.textField('dbox', ann='please enter here your ass export path', it='ass exportpath')
+        cmds.setParent('..')
+        cmds.rowColumnLayout(numberOfRows=1, rowSpacing=(10, 30), cs=[(450, 15)])
+        cmds.button(label='Export Ass', command='btn1()', bgc=(0.2, 0.2, 0.2))
+        cmds.button(label='Update Scene', command='btn2()', bgc=(0.2, 0.2, 0.2))
+        cmds.button(label='Import Ass', command='btn3()', bgc=(0.2, 0.2, 0.2))
+        cmds.button(label='Hirarchy', command='btn4()', bgc=(0.2, 0.2, 0.2))
+        cmds.setParent('..')
+        cmds.rowColumnLayout(numberOfRows=1, rowSpacing=(10, 30), cs=[(450, 15)])
+        cmds.checkBox(label='Windows', onc='am-10', ofc='am=6')
+        cmds.button(label='Update path', command='btn5()', bgc=(0.2, 0.2, 0.2))
+        cmds.button(label='Assign Shader', command='asgn_shd()', bgc=(0.2, 0.2, 0.2))
+        cmds.setParent('..')
+        cmds.text(label='Assnodes visibility state', align='left')
+        cmds.rowColumnLayout(numberOfRows=1, highlightColor=(2.2, 1.2, 0.5), cs=[(450, 30)])
+        cmds.button(label='BoundingBox', command='bound_box(0)', bgc=(0.2, 0.2, 0.2))
+        cmds.button(label='wireframe', command='bound_box(3)', bgc=(0.2, 0.2, 0.2))
+        cmds.button(label='shaded', command='bound_box(6)', bgc=(0.2, 0.2, 0.2))
+        cmds.setParent('..')
+        cmds.checkBox(label='Lock all Ass Node', onc='assExport_btn_grp().ass_lock()',
+                      ofc='assExport_btn_grp().wordwar_end()')
+        cmds.setParent('..')
+        cmds.showWindow()
+
+    def ass_lock(self):
+        scene_ass = cmds.ls(type="aiStandIn")
+        n_ass_list = []
+        all_attrs = [".tx", ".ty", ".tz", ".rx", ".ry", ".rz", ".sx", ".sy", ".sz"]
+        if len(scene_ass) >= 1:
+            for e_ass in scene_ass:
+                n_ass = e_ass.replace("Shape", "")
+                n_ass_list.append(n_ass)
+                print n_ass_list
+            for h in n_ass_list:
+                for f in all_attrs:
+                    try:
+                        cmds.setAttr(h + f, lock=True)
+                    except:
+                        pass
+            n_ass_list = []
+            scene_ass = []
+            cmds.confirmDialog(title="Done", message="Process Done", cancelButton="Close")
+        else:
+            cmds.confirmDialog(title="Error !!!", message="Dude atleast keep and ass node to process",
+                               cancelButton="Retry")
+
+    def ass_game(self):
+        if am == 10:
+            print "connecting ass to window path..."
+            ass_export_path = cmds.textField("dbox", text=True, query=True)
+        elif am == 6:
+            print "connecting ass to linux path..."
+            ass_export_path = ass_export_path = cmds.textField("dbox", text=True, query=True)
+        else:
+            print "connecting ass to linux path..."
+            ass_export_path = ass_export_path = cmds.textField("dbox", text=True, query=True)
+
+        dmesh = cmds.ls(type="mesh")
+        eass = cmds.ls(type="aiStandIn")
+        kmesh = []
+        if len(dmesh) >= 1:
+            for m in dmesh:
+                if "Shape" in m:
+                    g = m.replace("Shape", "")
+                    kmesh.append(g)
+            for t in kmesh:
+                for a in eass:
+                    if t in a:  # assExport_btn_grp().ass_game()
+                        try:
+                            cmds.select(t)
+                            om = cmds.ls(selection=True)
+                            if "\\" in ass_export_path:
+                                new_path = ass_export_path + "\\" + t + ".ass.gz"
+                            else:
+                                new_path = ass_export_path + "/" + t + ".ass.gz"
+                                print new_path
+                            cmds.setAttr(a + ".dso", new_path, type="string")
+                        except:
+                            pass
+        else:
+            for d in eass:
+                r = d.replace("_assShape", "")
+                if "\\" in ass_export_path:
+                    new_path = ass_export_path + "\\" + r + ".ass.gz"
+                    print r
+                    low = d + ".dso"
+                    cmds.setAttr(low, new_path, type="string")
+                else:
+                    new_path = ass_export_path + "/" + r + ".ass.gz"
+
+
+def printClashing():
+    clashes = [x for x in cmds.ls() if "|" in x]
+    for c in clashes:
+        print c
+    if not clashes:
+        print "no clashing objects found in the scene"
+
+
+def shape_chk():
+    c = 0
+    r = cmds.ls(type="mesh")
+    x = cmds.listRelatives(r, allParents=True)
+    for i in x:
+        for j in x:
+            if i == j:
+                c = c + 1
+        if c > 1:
+            print i
+        c = 0
+
+
+def asgn_shd():
+    sNode = ""
+    newlist = []
+    all_meshes = cmds.ls(type="mesh")
+    for i in all_meshes:
+        mesh_sel = cmds.listConnections(i)
+        if "initialShadingGroup" in mesh_sel:
+            mesh_sel.remove("initialShadingGroup")
+            newlist.append(mesh_sel)
+            print newlist
+            cmds.confirmDialog(title="Error !!!", message="assign a new shader to objects, Check Script Editor",cancelButton="Retry")
+        else:
+            for d in mesh_sel:
+                print d
+                if "SG" in d:
+                    print d
+                    sNode = d
+                print sNode
+            ex_shader = ""
+            ex_shader = cmds.listConnections(sNode + ".surfaceShader")
+            nw_msh_nm = i.replace("Shape", "")
+            print nw_msh_nm
+            cmds.select(nw_msh_nm + "_ass")
+            cmds.hyperShade(assign=ex_shader[0])
+
+
+def btn1():
+    assExport_btn_grp().mesh_list()
+    assExport_btn_grp().ass_export()
+
+
+def btn2():
+    assExport_btn_grp().ass_path_check()
+
+
+def btn3():
+    assExport_btn_grp().import_aiStandin()
+
+
+def btn4():
+    assExport_btn_grp().link_ass()
+
+
+def btn5():
+    assExport_btn_grp().ass_game()
+
+
+assExport_btn_grp().tool_window()
