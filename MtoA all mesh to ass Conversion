@@ -1,9 +1,30 @@
+# Instruction to use the script
+# 1. Download the above Archive from Google Drive, extract to any hard disk path.
+# Drive path:  http://drive.google.com/file/d/1OB1j5cBZ9qHUozTvde_O2SUE-hLPJzMg/view?usp=sharing
 
-###############################################
+# 2. Get the code from Github. Drag and drop to Maya Python script editor.
+# 3. Change the toolicon and aiFile path. Run the script. (for Windows os, change *\* to */*)
 
- #### Written by Girijashankar Senapati #####
+# 4. Click on Multiple Meshchk and Shape nodechk to identify the extra shapes nodes in the scene. Fix  the mesh.
 
-###############################################
+# 5. Enter the path where you want to export ass and Click on Export Ass. (for Windows os, change *\* to */*)
+# 6. Enter the path where you want to export ass. ( for windows os, change *\* to */* and write the path)
+
+# 7. After the exporting completed. Click on Update Scene and check script editor for any dead mesh( multiple shape nodes). Clean if any extra shape nodes found. Close the tool, delete all exported ass, Rerun the tool, Re-Export ass.
+
+# 8. Now click Import Ass. Then Hirarchy and Update path. ( it creates aiStandin files, update the path to the exported ass path. finally it moves all ass near to its parent mesh.)
+
+# 9. Before click on Assign Shader, make sure any meshes does not have lambert shader. Code can not transfer lamber shader.
+# 10. Now Rock and Roll..
+ 
+
+# You can select the ass and change the visibilty state. You can lock the transform, rotate and scale value by check  on Lock all Node.
+ 
+
+# I am available at gshankar165@gmail.com 
+# image reference https://knowledge.autodesk.com/community/article/148591
+
+# Author: Girijashankar Senapati
 
 
 
