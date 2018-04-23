@@ -1,0 +1,58 @@
+
+'''
+
+Classing Name Renaming Script.
+
+'''
+--------------------------------------
+
+Author: Girijashankar Senapati
+
+--------------------------------------
+
+
+import maya.cmds as cmds
+
+def commonSting():
+    
+    '''
+     all_polys: list: all meshes in scene
+     g: list : parent nodes
+    '''
+
+    all_polys= cmds.ls(type= "mesh")    
+    g= cmds.listRelatives(all_polys, allParents=True)   
+    og=[]
+    
+    '''
+    og: common name strings filter
+    '''
+    for i in g:
+        if g.count(i)>1:
+            #print i
+            if i not in og:
+                og.append(i)
+                continue
+            #print og
+    '''
+    A: string : *string*
+    getSel: list:  selection data A 
+    B: string: eg> string01: renaming command.
+    '''
+                
+    for f in og:
+        A= "*"+ f +"*"
+        cmds.select(A)
+        getSel= cmds.ls(sl=True,dag=True)
+        #print getSel
+        for g in range(len(getSel)):
+            if "Shape" not in getSel[g]:
+                #print getSel[g]
+                B= f + str(g)
+                #print B 
+                cmds.rename(getSel[g], B)
+    print "Done"
+
+commonSting()
+            
+#### Finished ###
