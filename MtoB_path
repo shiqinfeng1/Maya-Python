@@ -1,0 +1,11 @@
+allShapes=cmds.ls(type="mesh")
+
+for mesh in allShapes:
+    cmds.select(mesh)
+    lsConn= cmds.listConnections()
+    for shd in lsConn:
+        if "SG" in shd:
+            print shd
+            getShader= cmds.ls(cmds.listConnections(shd), materials= 1)
+            print getShader
+            
