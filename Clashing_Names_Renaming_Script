@@ -3,12 +3,13 @@
 
 Classing Name Renaming Script.
 
-'''
 --------------------------------------
 
 Author: Girijashankar Senapati
 
 --------------------------------------
+'''
+
 
 
 import maya.cmds as cmds
