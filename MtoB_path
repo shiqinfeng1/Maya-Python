@@ -7,5 +7,11 @@ for mesh in allShapes:
         if "SG" in shd:
             print shd
             getShader= cmds.ls(cmds.listConnections(shd), materials= 1)
-            print getShader
+            print getShader # return shader name
             
+cmds.connectionInfo("base_matrial.color"), sfd=True) # retrun texture data
+gss= cmds.getAttr("base_matrial.color")  # return RGB value 0 0 0 in tuple
+R,G,B= gss[0] # split tuple to R=0, G=0, B=0
+
+if R==0 or G==0 or B==0:
+    print 123
