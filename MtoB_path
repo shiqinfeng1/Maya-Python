@@ -15,3 +15,33 @@ R,G,B= gss[0] # split tuple to R=0, G=0, B=0
 
 if R==0 or G==0 or B==0:
     print 123
+
+
+
+
+##################### quering 
+
+
+import xml.etree.ElementTree as ET
+
+tree= ET.parse("item.xml")
+root= tree.getroot()
+
+
+print (root[0][1].attrib) # return item2
+
+for elm in root:
+    for subelm in elm:
+        print (subelm.attrib) # return all items item1 item2
+        
+print (root[0][1],text) # return item1abc
+
+for elm in root:
+    for subelm in elm:
+        print (subelm.text) # return all texts item1abc item2abc
+        
+        
+        
+##### quering type 02
+
+
