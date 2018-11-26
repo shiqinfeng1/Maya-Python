@@ -1,0 +1,27 @@
+
+ex_shader_list= cmds.ls(material= True)
+
+def conn_func(tShader, tSGnode):
+	cmds.connectAttr(tShader+".outColor", tSGnode+".surfaceShader", force= True)
+
+def tempSG_func(zShader):
+	allNodes= cmds.listConnections(zShader)
+	for each_node in allNodes:
+		if "SG" in each_node:
+			tempSG_nodes.append(each_node)
+			break
+
+def blue_bulb_shading(): # blue_bulb
+	global tempMats
+	global tempSG_nodes
+	tempMats=[]
+	tempSG_nodes=[]
+	for each_shader in ex_shader_list:
+		if "Blue_BulbGlass" in each_shader: # blue_bulb
+			tempMats.append(each_shader)
+	for each_tempMat in tempMats:
+		tempSG_func(each_tempMat)
+	for each_SG in tempSG_nodes:
+		tempMesh= getShape("blue_ball") # blue_bulb
+		tempShader= meshShader(tempMesh)
+		conn_func(tempShader[0], each_SG)
