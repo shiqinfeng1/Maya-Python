@@ -4,6 +4,13 @@ ex_shader_list= cmds.ls(material= True)
 def conn_func(tShader, tSGnode):
 	cmds.connectAttr(tShader+".outColor", tSGnode+".surfaceShader", force= True)
 
+def getShape(zShape):
+	cmds.select(zShape)
+	cmds.pickWalk(d="down")
+	g_poly= cmds.ls(sl=True)
+	return g_poly
+
+
 def tempSG_func(zShader):
 	allNodes= cmds.listConnections(zShader)
 	for each_node in allNodes:
